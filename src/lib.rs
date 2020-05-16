@@ -7,7 +7,7 @@ struct GameError(String);
 
 impl std::fmt::Display for GameError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "{:?}", self)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -64,11 +64,15 @@ impl Game {
     }
 
     /// Draw the topmost  amount  cards from the deck.
-    fn draw(&mut self, amount: u8) {
-        self.hand
-            .extend(self.deck.split_off(self.deck.len() - (amount as usize)));
+    fn draw(&mut self, amount: u8) -> Result<(), GameError> {
+        if amount as usize > self.deck.len() {
+            Err(GameError(format!("Not enough cards in the deck")))
+        } else {
+            self.hand
+                .extend(self.deck.split_off(self.deck.len() - (amount as usize)));
+            Ok(())
+        }
     }
-
     /// Play a card from the hand to a specific pile.
     fn play(&mut self, card: &u8, pile: &str) -> Result<(), GameError> {
         // Check if the pile is correct.
@@ -110,6 +114,60 @@ impl Game {
             None => Err(GameError(format!("Card `{}` not available.", card))),
         }
     }
+}
+
+/// Process an input accordingly.
+fn process(input: &str, game: &mut Game) -> Result<(), impl std::error::Error> {
+    let mut input = input.trim().split_terminator(' ');
+
+    // Match the command part of the input.
+    if let Some(command) = input.next() {
+        match command {
+            "exit" => std::process::exit(0),
+            "play" => {
+                let card: u8 = if let Some(s) = input.next() {
+                    if let Ok(num) = s.parse() {
+                        num
+                    } else {
+                        return Err(GameError(format!("Could not parse input {}", s)));
+                    }
+                } else {
+                     return Err(GameError("No card supplied to play".to_owned()));
+                };
+                let pile = if let Some(s) = input.next() {
+                    s
+                } else {
+                    return Err(GameError("No pile supplied to play".to_owned()));
+                };
+                (*game).play(&card, pile)
+            },
+            "move" => {
+                let card: u8 = if let Some(s) = input.next() {
+                    if let Ok(num) = s.parse() {
+                        num
+                    } else {
+                        return Err(GameError(format!("Could not parse input {}", s)));
+                    }
+                } else {
+                     return Err(GameError("No card supplied to play".to_owned()));
+                };
+                let pile = if let Some(s) = input.next() {
+                    s
+                } else {
+                    return Err(GameError("No pile supplied to play".to_owned()));
+                };
+                (*game).dedeck(&card, pile)
+            },
+            "new" => {
+                *game = Game::new();
+                Ok(())
+            },
+            _ => Err(GameError("Could not process query".to_owned())),
+        }?;
+        return Ok(());
+    }
+    Err(GameError("No command given".to_owned()))
+
 }
 
 /// The REPL wrapper around the game.
