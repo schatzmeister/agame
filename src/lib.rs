@@ -13,6 +13,32 @@ struct Game {
     down2: Vec<u8>,
 }
 
+impl std::fmt::Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f,
+            "({decklen})|{up1} {up2} {down1} {down2}|{hand:?}",
+            decklen = self.deck.len(),
+            up1 = match self.up1.last() {
+                Some(x) => x.to_string(),
+                None => "X".to_string(),
+            },
+            up2 = match self.up2.last() {
+                Some(x) => x.to_string(),
+                None => "X".to_string(),
+            },
+            down1 = match self.down1.last() {
+                Some(x) => x.to_string(),
+                None => "X".to_string(),
+            },
+            down2 = match self.down2.last() {
+                Some(x) => x.to_string(),
+                None => "X".to_string(),
+            },
+            hand = self.hand,
+        )
+    }
+}
+
 impl Game {
     /// Create a new instance of Game.
     fn new() -> Self {
