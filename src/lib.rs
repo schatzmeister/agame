@@ -29,7 +29,7 @@ impl std::fmt::Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(
             f,
-            "({decklen})|↑{up1} ↑{up2} ↓{down1} ↓{down2}|{hand:?}",
+            "({decklen}) | ↑{up1}  ↑{up2}  ↓{down1}  ↓{down2} | {hand:?}",
             decklen = self.deck.len(),
             up1 = match self.up1.last() {
                 Some(x) => x.to_string(),
@@ -85,9 +85,9 @@ impl Game {
         };
         // TODO: Check if the card is actually playable.
         // Check if the card exist in the hand.
-        match self.deck.iter().position(|x| x == &card) {
+        match self.hand.iter().position(|x| x == &card) {
             Some(index) => {
-                pile.push(self.deck.remove(index));
+                pile.push(self.hand.remove(index));
                 Ok(())
             },
             None => Err(GameError(format!("Card `{}` not available.", card))),
@@ -191,6 +191,7 @@ pub fn repl() {
     let mut game = Game::new();
 
     loop {
+        println!("\n{}", &game);
         let input = {
             let mut input = String::new();
             match io::stdin().read_line(&mut input) {
@@ -211,7 +212,7 @@ pub fn repl() {
 fn startup() {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    println!("Welcome to a game v{}", VERSION);
+    println!("Welcome to a game v{}\n", VERSION);
 }
 
 #[cfg(test)]
