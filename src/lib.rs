@@ -63,10 +63,10 @@ impl Game {
         }
     }
 
-    /// Draw the topmost  amount  cards from the deck.
+    /// Draw the topmost _amount_ cards from the deck.
     fn draw(&mut self, amount: u8) -> Result<(), GameError> {
         if amount as usize > self.deck.len() {
-            Err(GameError(format!("Not enough cards in the deck")))
+            Err(GameError("Not enough cards in the deck".to_owned()))
         } else {
             self.hand
                 .extend(self.deck.split_off(self.deck.len() - (amount as usize)));
@@ -150,15 +150,27 @@ fn process(input: &str, game: &mut Game) -> Result<(), GameError> {
                         return Err(GameError(format!("Could not parse input {}", s)));
                     }
                 } else {
-                     return Err(GameError("No card supplied to play".to_owned()));
+                     return Err(GameError("No card supplied to move".to_owned()));
                 };
                 let pile = if let Some(s) = input.next() {
                     s
                 } else {
-                    return Err(GameError("No pile supplied to play".to_owned()));
+                    return Err(GameError("No pile supplied to move".to_owned()));
                 };
                 (*game).dedeck(card, pile)
             },
+            "draw" => {
+                let amount: u8 = if let Some(s) = input.next() {
+                    if let Ok(num) = s.parse() {
+                        num
+                    } else {
+                        return Err(GameError(format!("Could not parse input {}", s)));
+                    }
+                } else {
+                     return Err(GameError("No amount supplied to draw".to_owned()));
+                };
+                (*game).draw(amount)
+            }
             "new" => {
                 *game = Game::new();
                 Ok(())
