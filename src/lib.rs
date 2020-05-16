@@ -209,14 +209,14 @@ mod tests {
     #[test]
     fn draw_test() {
         let mut game = Game::new();
-        game.draw(8);
+        game.draw(8).unwrap();
         assert_eq!(game.hand.len(), 8);
     }
 
     #[test]
     fn play_test() {
         let mut game = Game::new();
-        game.draw(8);
+        game.draw(8).unwrap();
         let card = game.hand.last().unwrap().to_owned();
         game.play(card, "up1").unwrap();
         assert_eq!(game.up1.len(), 1);
