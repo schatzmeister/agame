@@ -83,7 +83,7 @@ impl Game {
         match self.hand.iter().position(|x| x == card) {
             Some(index) => {
                 pile.push(self.hand.remove(index));
-                Ok(()) 
+                Ok(())
             },
             None => Err(GameError(format!("Card `{}` not available.", card))),
         }
@@ -135,7 +135,8 @@ mod tests {
     fn play_test() {
         let mut game = Game::new();
         game.draw(8);
-        game.play(game.hand.last().unwrap(), "up1");
+        let card = game.hand.last().unwrap().to_owned();
+        game.play(&card, "up1").unwrap();
         assert_eq!(game.up1.len(), 1);
         assert_eq!(game.hand.len(), 7);
     }
