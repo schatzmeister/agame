@@ -29,23 +29,23 @@ impl std::fmt::Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(
             f,
-            "({decklen}) | ↑{up1}  ↑{up2}  ↓{down1}  ↓{down2} | {hand:?}",
+            "({decklen}) | ↑{up1:<2}  ↑{up2:<2}  ↓{down1:<2}  ↓{down2:<2} | {hand:?}",
             decklen = self.deck.len(),
             up1 = match self.up1.last() {
                 Some(x) => x.to_string(),
-                None => "X".to_string(),
+                None => "__".to_string(),
             },
             up2 = match self.up2.last() {
                 Some(x) => x.to_string(),
-                None => "X".to_string(),
+                None => "__".to_string(),
             },
             down1 = match self.down1.last() {
                 Some(x) => x.to_string(),
-                None => "X".to_string(),
+                None => "__".to_string(),
             },
             down2 = match self.down2.last() {
                 Some(x) => x.to_string(),
-                None => "X".to_string(),
+                None => "__".to_string(),
             },
             hand = self.hand,
         )
@@ -173,6 +173,7 @@ fn process(input: &str, game: &mut Game) -> Result<(), GameError> {
             }
             "new" => {
                 *game = Game::new();
+                println!("Start new game.");
                 Ok(())
             },
             _ => Err(GameError("Could not process query".to_owned())),
@@ -212,7 +213,7 @@ pub fn repl() {
 fn startup() {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-    println!("Welcome to a game v{}\n", VERSION);
+    println!("Welcome to a game v{}\nStart new game.", VERSION);
 }
 
 #[cfg(test)]
