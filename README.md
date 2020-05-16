@@ -1,3 +1,3 @@
 # A Game
 
-Minimal command line implementation of “the game” by Steffen Benndorf.
+Minimal command line implementation of “The Game” by Steffen Benndorf.
