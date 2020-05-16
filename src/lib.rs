@@ -29,7 +29,7 @@ impl std::fmt::Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(
             f,
-            "({decklen})|{up1} {up2} {down1} {down2}|{hand:?}",
+            "({decklen})|↑{up1} ↑{up2} ↓{down1} ↓{down2}|{hand:?}",
             decklen = self.deck.len(),
             up1 = match self.up1.last() {
                 Some(x) => x.to_string(),
@@ -77,17 +77,38 @@ impl Game {
             "up2" => &mut self.up2,
             "down1" => &mut self.down1,
             "down2" => &mut self.down2,
-            s => return Err(GameError(format!("Pile `{}` does not exist.", s)))
+            s => return Err(GameError(format!("Pile `{}` does not exist.", s))),
         };
+        // TODO: Check if the card is actually playable.
         // Check if the card exist in the hand.
-        match self.hand.iter().position(|x| x == card) {
+        match self.deck.iter().position(|x| x == card) {
             Some(index) => {
-                pile.push(self.hand.remove(index));
+                pile.push(self.deck.remove(index));
                 Ok(())
             },
             None => Err(GameError(format!("Card `{}` not available.", card))),
         }
+    }
+
+    /// Play a card from the deck.
+    fn dedeck(&mut self, card:&u8, pile: &str) -> Result<(), GameError> {
+        // Check if the pile is correct.
+        let pile = match pile {
+            "up1" => &mut self.up1,
+            "up2" => &mut self.up2,
+            "down1" => &mut self.down1,
+            "down2" => &mut self.down2,
+            s => return Err(GameError(format!("Pile `{}` does not exist.", s))),
+        };
         // TODO: Check if the card is actually playable.
+        // Check if the card exist in the hand.
+        match self.deck.iter().position(|x| x == card) {
+            Some(index) => {
+                pile.push(self.deck.remove(index));
+                Ok(())
+            },
+            None => Err(GameError(format!("Card `{}` not available.", card))),
+        }
     }
 }
 
