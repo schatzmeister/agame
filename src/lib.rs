@@ -74,7 +74,7 @@ impl Game {
         }
     }
     /// Play a card from the hand to a specific pile.
-    fn play(&mut self, card: &u8, pile: &str) -> Result<(), GameError> {
+    fn play(&mut self, card: u8, pile: &str) -> Result<(), GameError> {
         // Check if the pile is correct.
         let pile = match pile {
             "up1" => &mut self.up1,
@@ -85,7 +85,7 @@ impl Game {
         };
         // TODO: Check if the card is actually playable.
         // Check if the card exist in the hand.
-        match self.deck.iter().position(|x| x == card) {
+        match self.deck.iter().position(|x| x == &card) {
             Some(index) => {
                 pile.push(self.deck.remove(index));
                 Ok(())
@@ -95,7 +95,7 @@ impl Game {
     }
 
     /// Play a card from the deck.
-    fn dedeck(&mut self, card:&u8, pile: &str) -> Result<(), GameError> {
+    fn dedeck(&mut self, card:u8, pile: &str) -> Result<(), GameError> {
         // Check if the pile is correct.
         let pile = match pile {
             "up1" => &mut self.up1,
@@ -106,7 +106,7 @@ impl Game {
         };
         // TODO: Check if the card is actually playable.
         // Check if the card exist in the hand.
-        match self.deck.iter().position(|x| x == card) {
+        match self.deck.iter().position(|x| x == &card) {
             Some(index) => {
                 pile.push(self.deck.remove(index));
                 Ok(())
@@ -117,7 +117,8 @@ impl Game {
 }
 
 /// Process an input accordingly.
-fn process(input: &str, game: &mut Game) -> Result<(), impl std::error::Error> {
+// TODO: Refactor parsing into its own function.
+fn process(input: &str, game: &mut Game) -> Result<(), GameError> {
     let mut input = input.trim().split_terminator(' ');
 
     // Match the command part of the input.
@@ -139,7 +140,7 @@ fn process(input: &str, game: &mut Game) -> Result<(), impl std::error::Error> {
                 } else {
                     return Err(GameError("No pile supplied to play".to_owned()));
                 };
-                (*game).play(&card, pile)
+                (*game).play(card, pile)
             },
             "move" => {
                 let card: u8 = if let Some(s) = input.next() {
@@ -156,7 +157,7 @@ fn process(input: &str, game: &mut Game) -> Result<(), impl std::error::Error> {
                 } else {
                     return Err(GameError("No pile supplied to play".to_owned()));
                 };
-                (*game).dedeck(&card, pile)
+                (*game).dedeck(card, pile)
             },
             "new" => {
                 *game = Game::new();
@@ -175,19 +176,21 @@ fn process(input: &str, game: &mut Game) -> Result<(), impl std::error::Error> {
 /// manages in- and output.
 pub fn repl() {
     startup();
+    let mut game = Game::new();
 
     loop {
         let input = {
             let mut input = String::new();
             match io::stdin().read_line(&mut input) {
                 Ok(_) => input,
-                Err(e) => panic!("Error occurred: {}", e),
+                Err(e) => {
+                    println!("Could not read from input: {}", e);
+                    continue;
+                },
             }
         };
-        if input == "exit\n" {
-            break;
-        } else {
-            println!("Status: {}", input);
+        if let Err(GameError(msg)) = process(&input, &mut game) {
+            println!("Error: {}", msg);
         }
     }
 }
@@ -215,7 +218,7 @@ mod tests {
         let mut game = Game::new();
         game.draw(8);
         let card = game.hand.last().unwrap().to_owned();
-        game.play(&card, "up1").unwrap();
+        game.play(card, "up1").unwrap();
         assert_eq!(game.up1.len(), 1);
         assert_eq!(game.hand.len(), 7);
     }
